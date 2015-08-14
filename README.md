@@ -22,6 +22,6 @@ The [tictactoe implementation in clojure](https://github.com/demonh3x/tictactoe.
 `gradle test --info`
 
 ## Compile
-`gradle shadowJar` will compile the *.jar file at `build/libs/interop.jar`.
+`gradle shadowJar` will compile the *.jar file at `build/libs/clj-tictactoe-in-java-server.jar`.
 
-`java -jar build/libs/interop.jar` will start the server at port 8080.
+`java -jar build/libs/clj-tictactoe-in-java-server.jar` will start the server at port 8080.

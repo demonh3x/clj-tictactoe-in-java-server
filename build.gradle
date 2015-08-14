@@ -21,13 +21,13 @@ dependencies {
 }
 
 shadowJar {
-    archiveName = 'interop.jar'
+    archiveName = 'clj-tictactoe-in-java-server.jar'
     classifier = ''
     mergeServiceFiles()
     exclude 'META-INF/*.DSA'
     exclude 'META-INF/*.RSA'
 
     manifest {
-        attributes 'Main-Class': 'interop.Main'
+        attributes 'Main-Class': 'tictactoe.Main'
     }
 }
