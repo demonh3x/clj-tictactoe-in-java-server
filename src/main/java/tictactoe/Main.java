@@ -8,7 +8,7 @@ import java.util.concurrent.Executors;
 
 public class Main {
     public static void main(String[] args) {
-        final WebappAdapter webapp = new WebappAdapter(Clj.fn("tictactoe.web", "webapp"));
+        final WebappAdapter webapp = new WebappAdapter(Clojure.function("tictactoe.web", "webapp"));
         ExecutorService executor = Executors.newCachedThreadPool();
         new Server(executor, 8080, new ThreadedHandler(executor, new Http(webapp))).start();
 

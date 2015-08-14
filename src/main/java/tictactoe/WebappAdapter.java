@@ -7,6 +7,7 @@ import com.github.demonh3x.server.http.Request;
 import com.github.demonh3x.server.http.RequestHandler;
 import com.github.demonh3x.server.http.Response;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
@@ -39,9 +40,11 @@ public class WebappAdapter implements RequestHandler {
 
     private Response parseResponse(Object ringResponse) {
         IPersistentMap map = (IPersistentMap) ringResponse;
+
         int statusCode = ((Long) map.valAt(read(":status"))).intValue();
         byte[] bodyContent = readBodyContent(map.valAt(read(":body")));
-        Map<String, String> headers = new CljMap(map.valAt(read(":headers")));
+        Map<String, String> headers = new ClojureMap((IPersistentMap) map.valAt(read(":headers")));
+
         return new Response(statusCode, "", bodyContent, headers);
     }
 
@@ -56,31 +59,37 @@ public class WebappAdapter implements RequestHandler {
     }
 
     private byte[] consume(InputStream inputStream) {
-        byte allData[] = new byte[16000];
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         try {
-            int bytesRead = inputStream.read(allData);
-            return Arrays.copyOfRange(allData, 0, bytesRead);
+            int b = inputStream.read();
+            while (b != -1) {
+                buffer.write(b);
+                b = inputStream.read();
+            }
+            return buffer.toByteArray();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private static class CljMap extends AbstractMap<String, String> {
+    private static class ClojureMap extends AbstractMap<String, String> {
         private final Set<Entry<String, String>> entries;
 
         private static Set<Entry<String, String>> entries(IPersistentMap map) {
             HashSet<Entry<String, String>> entries = new HashSet<>();
-            for (ISeq s=map.seq(); s != null; s=s.next()) {
-                final Map.Entry e = (Map.Entry) s.first();
+
+            for (ISeq sequence = map.seq(); sequence != null; sequence = sequence.next()) {
+                final Map.Entry entry = (Map.Entry) sequence.first();
+
                 entries.add(new Entry<String, String>() {
                     @Override
                     public String getKey() {
-                        return e.getKey().toString();
+                        return entry.getKey().toString();
                     }
 
                     @Override
                     public String getValue() {
-                        return e.getValue().toString();
+                        return entry.getValue().toString();
                     }
 
                     @Override
@@ -89,11 +98,12 @@ public class WebappAdapter implements RequestHandler {
                     }
                 });
             }
+
             return entries;
         }
 
-        public CljMap(Object map) {
-            this.entries = entries((IPersistentMap) map);
+        public ClojureMap(IPersistentMap map) {
+            this.entries = entries(map);
         }
 
         @Override

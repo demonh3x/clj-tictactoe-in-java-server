@@ -57,7 +57,7 @@ public class WebappAdapterTest {
     }
 
     private Object requestSentFor(String uri) {
-        Object nullResponse = Clj.eval(
+        Object nullResponse = eval(
                 "{:status 200 :body \"response body\" :headers {\"key1\" \"value1\" \"key2\" \"value2\"}}"
         );
         IFnDouble clojureHandler = new IFnDouble(nullResponse);
@@ -68,9 +68,13 @@ public class WebappAdapterTest {
     }
 
     private Response responseReturnedFor(String ringResponse) {
-        IFnDouble clojureHandler = new IFnDouble(Clj.eval(ringResponse));
+        IFnDouble clojureHandler = new IFnDouble(eval(ringResponse));
         WebappAdapter webapp = new WebappAdapter(clojureHandler);
         Request nullRequest = new Request("GET", "/", "HTTP1.1", new byte[0], Collections.<String, String>emptyMap());
         return webapp.handle(nullRequest);
+    }
+
+    private static Object eval(String clojureCode) {
+        return Clojure.var("clojure.core", "eval").invoke(Clojure.read(clojureCode));
     }
 }
